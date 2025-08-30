@@ -1,0 +1,13 @@
+{
+  "name": "svc-worker",
+  "version": "1.0.0",
+  "main": "worker.js",
+  "license": "MIT",
+  "scripts": { "start": "node worker.js" },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@google-cloud/storage": "^7.14.0",
+    "pg": "^8.11.5",
+    "sharp": "^0.33.4"
+  }
+}

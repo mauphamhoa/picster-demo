@@ -1,0 +1,18 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build','-t','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/svc-web:$COMMIT_SHA','./svc-web']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/svc-web:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build','-t','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/svc-worker:$COMMIT_SHA','./svc-worker']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/svc-worker:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build','-t','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/job-cleanup:$COMMIT_SHA','./job-cleanup']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','$LOCATION-docker.pkg.dev/$PROJECT_ID/app-repo/job-cleanup:$COMMIT_SHA']
+
+options:
+  logging: CLOUD_LOGGING_ONLY

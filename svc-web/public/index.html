@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Picster Demo - Upload Images</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    h1 { color: #2c3e50; }
+    .upload-box { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; max-width: 560px; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 1em; }
+    .card { border: 1px solid #ddd; padding: 0.5em; width: 200px; text-align: center; background: #fafafa; }
+    img { max-width: 100%; height: auto; }
+    .status { font-size: 0.8em; color: #888; margin-top: .25em; }
+    .muted { color: #777; font-size: .9em;}
+    button { cursor: pointer; }
+    .row { display: flex; gap: 1em; align-items: center; }
+  </style>
+</head>
+<body>
+  <h1>📸 Picster Demo</h1>
+
+  <div class="upload-box">
+    <h3>Upload a new image</h3>
+    <form id="uploadForm">
+      <div class="row">
+        <input type="file" id="fileInput" name="file" accept="image/*" required>
+        <button type="submit">Upload</button>
+      </div>
+    </form>
+    <p class="muted">After upload, a background worker creates a thumbnail. Click refresh to see status update.</p>
+    <div id="uploadResult"></div>
+  </div>
+
+  <div>
+    <h3>Gallery</h3>
+    <div class="row">
+      <button onclick="loadImages()">Refresh Gallery</button>
+      <label class="muted"><input id="autoRefresh" type="checkbox" onchange="toggleAuto()"> auto refresh</label>
+    </div>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+<script>
+async function uploadFile(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById("fileInput");
+  if (!fileInput.files.length) return;
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  const res = await fetch("/upload", { method: "POST", body: formData });
+  if (res.ok) {
+    const data = await res.json();
+    document.getElementById("uploadResult").textContent = "Uploaded! image_id=" + data.image_id;
+    loadImages();
+  } else {
+    const txt = await res.text();
+    document.getElementById("uploadResult").textContent = "Error: " + txt;
+  }
+}
+
+async function loadImages() {
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "Loading...";
+  try {
+    const res = await fetch("/images");
+    const data = await res.json();
+    gallery.innerHTML = "";
+    data.forEach(img => {
+      const card = document.createElement("div");
+      card.className = "card";
+      if (img.thumb_url) {
+        const thumb = document.createElement("img");
+        thumb.src = img.thumb_url;
+        card.appendChild(thumb);
+      } else {
+        const span = document.createElement("div");
+        span.textContent = "[processing]";
+        card.appendChild(span);
+      }
+      const status = document.createElement("div");
+      status.className = "status";
+      status.textContent = img.status + (img.created_at ? " • " + new Date(img.created_at).toLocaleString() : "");
+      card.appendChild(status);
+      gallery.appendChild(card);
+    });
+  } catch(err) {
+    gallery.innerHTML = "Failed to load images: " + err;
+  }
+}
+
+let timer = null;
+function toggleAuto() {
+  const cb = document.getElementById("autoRefresh");
+  if (cb.checked) {
+    loadImages();
+    timer = setInterval(loadImages, 5000);
+  } else if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+
+document.getElementById("uploadForm").addEventListener("submit", uploadFile);
+loadImages();
+</script>
+</body>
+</html>

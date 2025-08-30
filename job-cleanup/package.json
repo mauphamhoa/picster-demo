@@ -1,0 +1,11 @@
+{
+  "name": "job-cleanup",
+  "version": "1.0.0",
+  "main": "cleanup.js",
+  "license": "MIT",
+  "scripts": { "start": "node cleanup.js" },
+  "dependencies": {
+    "@google-cloud/storage": "^7.14.0",
+    "pg": "^8.11.5"
+  }
+}
